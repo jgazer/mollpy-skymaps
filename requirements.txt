@@ -1,0 +1,7 @@
+matplotlib >=3.5.0
+numpy >=2.1.0
+
+# native packages:
+# json
+# datetime
+# os

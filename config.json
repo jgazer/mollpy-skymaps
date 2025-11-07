@@ -1,0 +1,29 @@
+
+{
+	"path_data" : "Data/Example/",
+	"path_ibex_lo" : "Data/IBEX/DR_17/Lo-Hydrogen/",
+	"path_ibex_hi" : "Data/IBEX/DR_18/Hi/",
+
+	"Ecl_Coords" : {
+		"nose_lon" : -105,
+		"nose_lat" : 5.0,
+		"tail_lon" : 75,
+		"tail_lat" : -5.0,
+		"ribbon_lon" : 218,
+		"ribbon_lat" : 40,
+		"NGP_lon" : 180.02,
+		"NGP_lat" : 29.81,
+		"Gal_center_lon" : 266.84,
+		"Gal_center_lat" : -5.54,
+		"V1_lon" : 261,
+		"V1_lat" : 34.9,
+		"V2_lon" : 311,
+		"V2_lat" : 47.5,
+		"NH_lon" : 286,
+		"NH_lat" : 1.4,
+		"P10_lon": 68,
+		"P10_lat": 16.5,
+		"P11_lon": 280.9,
+		"P11_lat": -10.4
+	}
+}
