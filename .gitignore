@@ -1,0 +1,4 @@
+__pycache__/**
+.ipynb_checkpoints/**
+Data/IBEX/DR_17/**
+Data/IBEX/DR_18/**

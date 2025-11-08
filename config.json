@@ -1,10 +1,11 @@
 
 {
-	"path_data" : "Data/Example/",
+	"path_data" : "Data/Examples/",
 	"path_ibex_lo" : "Data/IBEX/DR_17/Lo-Hydrogen/",
 	"path_ibex_hi" : "Data/IBEX/DR_18/Hi/",
 
 	"Ecl_Coords" : {
+		"//disclaimer" : "No guarantee is given for the correctness and accuracy of these coordinates.",
 		"nose_lon" : -105,
 		"nose_lat" : 5.0,
 		"tail_lon" : 75,
@@ -25,5 +26,19 @@
 		"P10_lat": 16.5,
 		"P11_lon": 280.9,
 		"P11_lat": -10.4
+	},
+	"orientation_keywords" : {
+		"ecl":0, "ecliptic":0,
+		"nose":1,
+		"tail":2,
+		"rbn":3, "ribbon":3, "ribbographic":3, "ribbon_g":3,
+		"ribbon_c":4, "ribbon_center":4, "ribbon_centered":4,
+		"gal":5, "galactic":5
+	},
+	"default_labels" : {
+		"title" : "Mollweide Map",
+		"xlabel" : "Ecl. Longitude (deg)",
+		"ylabel" : "Ecl. Latitude (deg)",
+		"clabel" : "Flux (#/cm^2 s sr keV)"
 	}
 }

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib.path import Path
 from matplotlib.patches import PathPatch
 import matplotlib.transforms as trf
-# from data_io import load_json, load_ibexfile_dr
+# from data_io import load_json, load_data
 import sphere_rotate as spr
 
 
@@ -132,9 +132,9 @@ def plot_rotated_map(lons, lats, data, alf=5, phi=255, th=0,
 ##  =======  plotting   =================
 
 def draw_mollweide_map( lons_plt, lats_plt, data_plt, angles,
-                figsize= (24,16), axes=None,
-                title='Mollweide Map', xlabel='Ecl.Longitude (deg)',
-                ylabel='Ecl.Latitude (deg)', clabel='Flux (#/cm^2 s sr keV)',
+                figsize= (12,8), axes=None,
+                title=None, xlabel=None,
+                ylabel=None, clabel=None,
                 lon_ticks= np.linspace(-150,180,12),
                 lat_ticks= np.linspace(-75,75,11),
                 lon_ticklabel_offset= (3.5, 1.5), #deg
@@ -143,7 +143,7 @@ def draw_mollweide_map( lons_plt, lats_plt, data_plt, angles,
                 title_color='k', xlabel_color='k', ylabel_color='k', clabel_color='k',
                 xtick_color='k', ytick_color='k', ctick_color='k',
                 face_color='lightgray', grid_color=[.35,.35,.35], grid_on=True, cbar_on=True,
-                cmap=None, cmap_bad=[0,0,0,0], cmap_under=[0,0,0,1], cmap_over=[1,1,1,1],
+                cmap='turbo', cmap_bad=[0,0,0,0], cmap_under=[0,0,0,1], cmap_over=[1,1,1,1],
                 vmin=None, vmax=None, cnorm=False, cbar_kwargs={}, map_alpha=1):
     """
     Draws a map of data in rotated coordinates in Mollweide projection, including colorbar, grid, labels...
@@ -156,20 +156,20 @@ def draw_mollweide_map( lons_plt, lats_plt, data_plt, angles,
     
     Optional Args:
         axes (matplotlib.pyplot.Axes): plot axes to draw into. If given, parent figure will be used as fig.
-        lon_ticks, lat_ticks: list of Lon & Lat axis tick values in [deg]
+        lon_ticks, lat_ticks (array): list of Lon & Lat axis tick values in [deg]
         lon_ticklabel_offset, lat_ticklabel_offset: (dx,dy) offsets of Lon & Lat ticks in [deg]
-        title_font, label_font, tick_font: font sizes
-        font_scale: scale factor for all fonts (default: 1)
+        title_font, label_font, tick_font (float): font sizes
+        font_scale (float): scale factor for all fonts (default: 1)
         title_color, xlabel_color, ylabel_color, clabel_color: colors of title text and axes texts
         xtick_color, ytick_color, ctick_color: colors of axes tick labels
         face_color: background color of Mollweide plot area
         grid_color: color of grid lines
-        grid_on: boolean whether grid is drawn
-        cbar_on: boolean whether to add colorbar
-        cmap: matplotlib.pyplot.cm.Colormap() or keyword (default: 'Turbo')
-        cmap_bad, cmap_under, cmap_over: RGB+alpha values for missing data, under or over the colorbar range
-        vmin, vmax: colorbar limits (default: data min & max)
-        cbar_kwargs: keywords & values for colorbar (see matplotlib.pyplot.colorbar)
+        grid_on (bool): if True grid is drawn
+        cbar_on (bool): if True add colorbar
+        cmap (str|colormap): colormap to be used for plot: mpl.pyplot.cm.Colormap or keyword or other colormap object.
+        cmap_bad, cmap_under, cmap_over (list): RGB+alpha values for missing data, under or over the colorbar range
+        vmin, vmax (float): colorbar limits (default: data min & max)
+        cbar_kwargs (dict): keywords & values for colorbar (see matplotlib.pyplot.colorbar)
         
     Returns:
         fig (matplotlib.pyplot.Figure): Figure object
@@ -229,6 +229,19 @@ def draw_mollweide_map( lons_plt, lats_plt, data_plt, angles,
         plt.pcolormesh( -np.radians( lons_plt[i]-360 +th ), np.radians(lats_plt[i]),
                        data_plt[i], cmap=cmap, vmin=vmin, vmax=vmax, alpha=map_alpha)
     cbar= plt.colorbar( ax.get_children()[0], **cbar_kwargs)
+    
+    # get default labels
+    if np.any([ (s is None) for s in [title, xlabel, ylabel, clabel] ]):
+        from data_io import load_json
+        lbls = load_json()['default_labels']
+        if title is None:
+            title = lbls['title']
+        if xlabel is None:
+            xlabel = lbls['xlabel']
+        if ylabel is None:
+            ylabel = lbls['ylabel']
+        if clabel is None:
+            clabel = lbls['clabel']
     
     # make labels
     ax.set_title(title, fontsize= title_font, color=title_color)
@@ -366,40 +379,37 @@ def orientate_map(kw):
     Returns: 
         phi, alf, th, center_meridian.
     '''
+    from data_io import load_json
+    jsn = load_json()
     
-    kw_dict ={ 'ecl':0, 'ecliptic':0, 'nose':1, 'tail':2, 
-              'rbn':3,'ribbon':3,'ribbographic':3,'ribbon_g':3,
-              'ribbon_c':4, 'ribbon_center':4, 'ribbon_centered':4,
-              'galactic':5}
+    kw_dict = jsn['orientation_keywords']
     assert kw in kw_dict, 'orientation_keyword not found: "'+str(kw)+'"'
     
-    from data_io import load_json
-    
-    jsn = load_json()['Ecl_Coords']
+    coord = jsn['Ecl_Coords']
     th = 0
     center_meridian = False
     if kw_dict[kw] == 0: # ecliptic orientation
         alf =0
         phi =0
     elif kw_dict[kw] == 1: # nose-centered
-        alf = jsn['nose_lat']
-        phi = jsn['nose_lon']
+        alf = coord['nose_lat']
+        phi = coord['nose_lon']
     elif kw_dict[kw] == 2: # tail-centered
-        alf = jsn['tail_lat']
-        phi = jsn['tail_lon']
+        alf = coord['tail_lat']
+        phi = coord['tail_lon']
     elif kw_dict[kw] == 3: # ribbon center as pole of view / ribbon as line
-        alf = -jsn['ribbon_lat']
-        phi = jsn['ribbon_lon']
+        alf = -coord['ribbon_lat']
+        phi = coord['ribbon_lon']
         th = -120
         center_meridian = True
     elif kw_dict[kw] == 4: # ribbon-centered / ribbon as circle
-        alf = jsn['ribbon_lat']
-        phi = jsn['ribbon_lon']
+        alf = coord['ribbon_lat']
+        phi = coord['ribbon_lon']
     elif kw_dict[kw] == 5: # galactic
         # from : 
-        alf = jsn['NGP_lat']-90
-        phi = jsn['NGP_lon']
-        th= jsn['Gal_center_lon']
+        alf = coord['NGP_lat']-90
+        phi = coord['NGP_lon']
+        th= coord['Gal_center_lon']
         center_meridian = True
     return phi, alf, th, center_meridian
 #END OF FUNCTION
@@ -412,13 +422,15 @@ def tag_date(fig):
     fig.text(.98, .999, date_tag, ha='right', va='top', fontsize=8)
 
 
-## ======== Execute this script if directly called : ========
+## ======== Execute this script if called directly: ========
 
 if __name__ == "__main__":
-    from data_io import load_ibexfile_dr as load
-    lons, lats, data = load()
+    from data_io import load_data
+    lons, lats, data = load_data('ibex-hi-3_noSP-ram-flux_2009-2019.csv')
     data[ np.where(data<=0) ] =np.nan
-    plot_rotated_map(lons,lats,data, orientation_kw='nose')
-    plt.plot(0,0,'ok')
-    plt.text(0.02,0.02,'Nose', fontsize=20)
+    import cmcrameri.cm as cmc
+    plot_rotated_map(lons,lats,data, orientation_kw='nose', font_scale=0.75, title='')
+    plt.plot(0,0,'.k')
+    plt.text(0.02,0.02,'Nose', fontsize=14, color='k')
     plt.show()
+    input("Press Enter to close the image and continue...")
